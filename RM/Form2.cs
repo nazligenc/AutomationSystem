@@ -19,6 +19,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
 using Button = System.Windows.Forms.Button;
 using System.Diagnostics.Eventing.Reader;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.Identity.Client;
 
 namespace RM
 {
@@ -94,7 +95,7 @@ namespace RM
         private void button2_Click(object sender, EventArgs e)
         {
             //parametreli method oluştur.
-
+         
             object a = button2.Tag;
             Butonsayac(button2.Tag);
            
@@ -114,58 +115,106 @@ namespace RM
         
         private HashSet<string> uniqueProductNames = new HashSet<string>(); //Hashset sınıfı elemanın sadece bir kez saklanmasına izin vermek için kullanıldı.
         private Dictionary<Button, int> buttonClickCounts = new Dictionary<Button, int>();
+
+        
+
+        public class UrunBilgisi
+        {
+            public string Ad { get; set; }
+            public int Miktar { get; set; }
+            public string Fiyat { get; set; }
+            public decimal yenitoplam;
+        }
+        private List<UrunBilgisi> urunBilgileri = new List<UrunBilgisi>();
+
        
-    
         public void Butonsayac(object y)
         {
-            int count = 0;
-            
+           
+
             Button buttons = y as Button;
 
             SqlConnection conn = new SqlConnection("Data Source=NAZLI\\MSSQLSERVER01;Initial Catalog=RM;Integrated Security=True");
             conn.Open();
-            string qry = ($"SELECT urunadi,urunfiyati,urunadedi FROM operation WHERE urunID={y}");
+            string qry = ($"SELECT urunadi,urunfiyati FROM operation WHERE urunID={y}");
             SqlCommand cmd = new SqlCommand(qry, conn);
             cmd.Parameters.AddWithValue("@ProductId", y);
             SqlDataReader reader = cmd.ExecuteReader();
-
             
+
+
+
             if (reader.Read())
             {
-                count = Convert.ToInt32(reader["urunadedi"]);
+               
                 string urunfiyati = reader["urunfiyati"].ToString();
                 string urunAdi = reader["urunadi"].ToString();
-                if (uniqueProductNames.Contains(urunAdi))  //ürün adını arıyor hashset sınıfında varsa boş return ediyor yoksa yazdırıyor.
+               
+                UrunBilgisi urunBilgi = new UrunBilgisi { Ad = urunAdi, Miktar = 1, Fiyat = urunfiyati }; 
+                var Urun = urunBilgileri.Find(u => u.Ad == urunAdi);
+                if (Urun != null) //listede ürün adı var mı diye kontrol ediyorum.
                 {
-                    return;
+                     
+                    Urun.Miktar++;
+                   
+                   
+
 
                 }
+                else
+                {
+                    urunBilgileri.Add(urunBilgi); 
+                }
+                listBox1.Items.Clear();   //fazladan yazmayı kaldırmak için gerekli olan method.
+                foreach (var urun in urunBilgileri)
+                {
+                    listBox1.Items.Add(urun.Ad + "                " + urun.Miktar+ "        " +urun.Fiyat+ "TL");
+                }
+
+
                 
-                
+                foreach (var urun in urunBilgileri)
+                {
+                    decimal toplam = 0;
+                    decimal urunFiyati = Convert.ToDecimal(reader["urunfiyati"]);
+                    toplam=toplam+ urun.Miktar * urunFiyati;
+                   
+
+                 
+
+
+                }
+
                
-
                 
-                int newProductCount = count + 1;
-                string updateQuery = "UPDATE operation SET urunadedi = @NewProductCount WHERE urunID = @ProductId";
-                SqlCommand updateCmd = new SqlCommand(updateQuery, conn);
-                updateCmd.Parameters.AddWithValue("@NewProductCount", newProductCount);
-                updateCmd.Parameters.AddWithValue("@ProductId",y);
-             
-                int urunadedi=Convert.ToInt32(reader["urunadedi"]);
-                decimal urunFiyati = Convert.ToDecimal(reader["urunfiyati"]);
-                decimal newtotal = 0;
-                decimal total;
-                total =newProductCount *Convert.ToDecimal(reader["urunfiyati"]);
-                newtotal += total;
-                // Butonun ürün adedini güncelledikten sonra ekrana yazdırıyoruz.
+                
+
+                             
+
+              
 
 
 
 
-                // Ürün adını benzersiz küme içine ekleyip bilgileri görüntülüyoruz.
-                uniqueProductNames.Add(urunAdi);
-                listBox1.Items.Add(urunAdi+    "                "   +newProductCount+    "        "   +urunfiyati+"TL");
-               label1.Text = newtotal.ToString();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
             }
@@ -200,9 +249,11 @@ namespace RM
 
         private void button3_Click(object sender, EventArgs e)
         {
+            
             object c = button3.Tag;
             
             Butonsayac(button3.Tag);
+            
             
         }
 
@@ -214,7 +265,7 @@ namespace RM
         private void button4_Click(object sender, EventArgs e)
         {
             comboBox1_SelectedIndexChanged(button4, null);
-           
+            
             object c = button4.Tag;
             Butonsayac(button4.Tag);
             
@@ -231,13 +282,26 @@ namespace RM
         //listbox'tan verileri seçili veya tamamı şeklinde silme işlemi.
         private void button5_Click(object sender, EventArgs e)
         {
+            
+              
             listBox1.Items.Remove(listBox1.SelectedItem);
-        }
+           Console.WriteLine( urunBilgileri.RemoveAll(urunBilgileri.Contains));//ürünleri silip başka ürün eklediğimde önceki silinen ürünler listbox'ta görünüyordu 
+                                                                               //bu yüzden bunu kullandım.
 
+
+           
+
+
+        }
+       
         private void button7_Click(object sender, EventArgs e)
         {
 
-            listBox1.Items.Clear();
+                listBox1.Items.Clear();
+            Console.WriteLine(urunBilgileri.RemoveAll(urunBilgileri.Contains));
+
+
+
         }
         //burda parametreyle button'ları fonksiyonla alıyoruz.
         private void parametre(Button button)
@@ -266,7 +330,7 @@ namespace RM
             {
 
                 button.Visible = false;
-
+                
             }
         }
 
@@ -287,39 +351,49 @@ namespace RM
 
         private void button8_Click(object sender, EventArgs e)
         {
-           
+
             object c = button8.Tag;
-            
             Butonsayac(button8.Tag);
+            
            
             
 
         }
         
 
-        private void button9_Click(object sender, EventArgs e)
+        private void button9_Click(object z, EventArgs e)
         {
-           
+         
             
             
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            
            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         }
 
         private void label1_Click_1(object sender, EventArgs e)
