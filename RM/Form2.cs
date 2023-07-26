@@ -127,7 +127,7 @@ namespace RM
         }
         private List<UrunBilgisi> urunBilgileri = new List<UrunBilgisi>();
 
-       
+        private decimal toplam;
         public void Butonsayac(object y)
         {
            
@@ -149,41 +149,56 @@ namespace RM
                
                 string urunfiyati = reader["urunfiyati"].ToString();
                 string urunAdi = reader["urunadi"].ToString();
-               
+              
                 UrunBilgisi urunBilgi = new UrunBilgisi { Ad = urunAdi, Miktar = 1, Fiyat = urunfiyati }; 
                 var Urun = urunBilgileri.Find(u => u.Ad == urunAdi);
                 if (Urun != null) //listede ürün adı var mı diye kontrol ediyorum.
                 {
                      
                     Urun.Miktar++;
-                   
+                  
                    
 
 
                 }
                 else
                 {
+                   
                     urunBilgileri.Add(urunBilgi); 
                 }
                 listBox1.Items.Clear();   //fazladan yazmayı kaldırmak için gerekli olan method.
                 foreach (var urun in urunBilgileri)
                 {
+                    
                     listBox1.Items.Add(urun.Ad + "                " + urun.Miktar+ "        " +urun.Fiyat+ "TL");
-                }
 
-
-                
-                foreach (var urun in urunBilgileri)
-                {
-                    decimal toplam = 0;
-                    decimal urunFiyati = Convert.ToDecimal(reader["urunfiyati"]);
-                    toplam=toplam+ urun.Miktar * urunFiyati;
                    
 
-                 
-
-
                 }
+                //toplama hesabı yapılırken kullandık.
+                toplam += Convert.ToInt32(urunBilgi.Fiyat) * urunBilgi.Miktar;
+                label1.Text = toplam.ToString();
+
+
+
+
+                //toplama hesabı yaptıramadım önceki veriyi tutan değişkeni tanımalamak zor olduğu için değişken kullanamadım.Buna çalışıyorum. 
+                //foreach (var urun in urunBilgileri)
+                //{
+                //    toplam = 0;
+                //    decimal urunFiyati = Convert.ToDecimal(reader["urunfiyati"]);
+                //    toplam=toplam+ urun.Miktar * urunFiyati;
+
+                //    label1.Text = toplam.ToString()+"TL";
+
+
+
+
+
+
+                //}
+                reader.Close();
+                conn.Close();
 
                
                 
