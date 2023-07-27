@@ -15,6 +15,7 @@ using System.IO;
 using System.Web.UI.WebControls;
 using System.Diagnostics.Eventing.Reader;
 
+
 namespace RM
 {
     public partial class frmoperation : Form
@@ -99,12 +100,29 @@ namespace RM
             //textBox'lara eklenen ürünleri gösteriyor.          
             conn.Open();
             Goruntu();
-            SqlCommand cmd = new SqlCommand("insert into operation(urunAdi,urunFiyati,urunTipi) values(@p1,@p2,@p3)", conn);
-            cmd.Parameters.AddWithValue("@p1", textBox2.Text);
-            cmd.Parameters.AddWithValue("@p2", textBox3.Text);
-            cmd.Parameters.AddWithValue("@p3", comboBox1.Text);
-            cmd.ExecuteNonQuery();
+            string yol=txtResim.Text;
 
+            if (!string.IsNullOrEmpty(txtResim.Text) && File.Exists(txtResim.Text))
+            {
+                SqlCommand cmd = new SqlCommand("insert into operation(urunAdi,urunFiyati,urunTipi,urunadedi,resim) values(@p1,@p2,@p3,@p4,@p5)", conn);
+                cmd.Parameters.AddWithValue("@p1", textBox2.Text);
+                cmd.Parameters.AddWithValue("@p2", textBox3.Text);
+                cmd.Parameters.AddWithValue("@p3", comboBox1.Text);
+                cmd.Parameters.AddWithValue("@p4", textBox1.Text);
+                cmd.Parameters.AddWithValue("@p5", yol);
+
+               
+               
+                
+               
+
+
+
+                cmd.ExecuteNonQuery();
+                //string imagefile = Path.GetFileName(pictureBox1.ImageLocation);
+                //string imagepath = Path.Combine(Application.StartupPath + "\\img\\" + imagefile);
+                //File.Copy(pictureBox1.ImageLocation,imagepath, true);
+            }
             conn.Close();
 
             MessageBox.Show("Ürün Eklendi");
@@ -163,6 +181,10 @@ namespace RM
 
         private void frmoperation_Load(object sender, EventArgs e)
         {
+            // TODO: Bu kod satırı 'rMDataSet14.operation' tablosuna veri yükler. Bunu gerektiği şekilde taşıyabilir, veya kaldırabilirsiniz.
+            this.operationTableAdapter7.Fill(this.rMDataSet14.operation);
+            // TODO: Bu kod satırı 'rMDataSet13.operation' tablosuna veri yükler. Bunu gerektiği şekilde taşıyabilir, veya kaldırabilirsiniz.
+            this.operationTableAdapter6.Fill(this.rMDataSet13.operation);
 
             this.operationTableAdapter.Fill(this.rMDataSet.operation);
 
@@ -192,6 +214,24 @@ namespace RM
        
 
         private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox4_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.ShowDialog();
+            pictureBox1.ImageLocation = openFileDialog1.FileName;
+            txtResim.Text = openFileDialog1.FileName;
+
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
         {
 
         }
