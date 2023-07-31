@@ -112,7 +112,10 @@ namespace RM
             
         }
         private List<UrunBilgisi> urunBilgileri = new List<UrunBilgisi>();
+        //UrunBilgisi[] urunBilgileri=new UrunBilgisi[100];
         UrunBilgisi urunBilgi;
+        UrunBilgisi urunBilgi2;
+
 
         private decimal toplam;
         public void Butonsayac(object y)
@@ -162,10 +165,10 @@ namespace RM
                 listBox1.Items.Clear();   //fazladan yazmayı kaldırmak için gerekli olan method.
                 foreach (var urun in urunBilgileri)
                 {
+
+                    listBox1.Items.Add(urun.Ad + " " + urun.Miktar+ " " +urun.Fiyat+ "TL");
+
                     
-                    listBox1.Items.Add(urun.Ad + "                " + urun.Miktar+ "        " +urun.Fiyat+ "TL");
-                   
-                   
 
                 }
                 //toplama hesabı yapılırken kullandık.
@@ -288,84 +291,138 @@ namespace RM
         }
         //listbox'tan verileri seçili veya tamamı şeklinde silme işlemi.
 
-      
-        
+
+
         private void button5_Click(object sender, EventArgs e)
         {
-            if (listBox1.SelectedItem != null)
-            {
-                
-                string seciliUrunAdi = listBox1.SelectedItem.ToString();
-                
+            //    if (listBox1.SelectedItem != null)
+            //    {
 
-                UrunBilgisi seciliUrun = urunBilgileri.FirstOrDefault(u => u.Ad == seciliUrunAdi);
-                
+            string seciliUrunAdi = listBox1.SelectedItem.ToString();
+            string[] dizi = seciliUrunAdi.Split(' ');
+            //if (dizi.Length >= 3)
+            //{
+                string urunAdi = dizi[0];
+                int yeniMiktar = Convert.ToInt32(dizi[1]);
+                string yeniFiyat = dizi[2];
 
-                if (seciliUrun != null)
+                int i = urunBilgileri.FindIndex(item => item.Ad == urunAdi);
+                if (i != -1)
                 {
-                    ürün 
-                    seciliUrun.Miktar--;
-
-                    if (seciliUrun.Miktar <= 0)
+                    UrunBilgisi urunBilgi = urunBilgileri[i]; 
+                    int azaltilacakMiktar = 1;
+                    if (urunBilgi.Miktar >=1)
                     {
-                        urunBilgileri.Remove(seciliUrun);
+                        urunBilgi.Miktar -= azaltilacakMiktar;
+                        toplam = Convert.ToInt32(urunBilgi.Fiyat) * urunBilgi.Miktar;
+                        label1.Text = toplam + "TL";
                     }
-                    Console.WriteLine(seciliUrun.Miktar);
-                    
-                    listBox1.Items.Clear();
-                    foreach (UrunBilgisi urun in urunBilgileri)
+                    else
                     {
-                        listBox1.Items.Add(urun.Ad + "                " +urun.Miktar + "        " + urun.Fiyat + "TL");
+                        listBox1.Items.Remove(seciliUrunAdi);
+                        MessageBox.Show("Ürün stokta yeterli miktarda yok.", "Stok Hatası", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        
                     }
-                    toplam -= Convert.ToDecimal(seciliUrun.Fiyat)*Convert.ToDecimal(seciliUrun.Miktar);
-                    label1.Text = toplam.ToString() + "TL";
+                    urunBilgileri[i] = urunBilgi;  //diziye ekliyorum burda.
+                    listBox1.Items[i] = urunBilgi.Ad + " " + urunBilgi.Miktar + " " + urunBilgi.Fiyat+"TL";
                 }
+                else
+                {
+                    UrunBilgisi urunBilgi = new UrunBilgisi { Ad = urunAdi, Miktar = yeniMiktar, Fiyat = yeniFiyat };
+                    urunBilgileri.Add(urunBilgi);
+                    listBox1.Items.Add(urunBilgi.Ad + " " + urunBilgi.Miktar + " " + urunBilgi.Fiyat+"TL");
+                }
+
+
+
+
+                // Eger koleksiyonda urunAdi ile uyusmus bir urun yoksa, yeni urunu koleksiyona ekleyebilirsiniz
+
+
+
+                //UrunBilgisi seciliUrun = urunBilgileri.Find(u => u.Ad == urunBilgi2.Ad);
+                //urunBilgi2.Miktar--;
+                //if (urunBilgi2.Miktar <= 0)
+                //{
+                //    listBox1.Items.Remove(urunBilgi2);
+                //}
+
+
+
+
+
+                //   urunBilgi2 = new UrunBilgisi { Ad = urunAdi, Miktar = 1, Fiyat = urunfiyati };
+
+
+                //    UrunBilgisi seciliUrun = urunBilgileri.Find(u => u.Ad == seciliUrunAdi);
+                //    Console.WriteLine(seciliUrun.Ad.ToString());
+
+                //    if (seciliUrun == null)
+                //    {
+
+                //        seciliUrun.Miktar--;
+
+                //        if (seciliUrun.Miktar <= 0)
+                //        {
+                //            urunBilgileri.Remove(seciliUrun);
+                //        }
+                //        Console.WriteLine(seciliUrun.Miktar+"oooooooo");
+
+                //        listBox1.Items.Clear();
+                //        foreach (UrunBilgisi urun in urunBilgileri)
+                //        {
+                //            listBox1.Items.Add(urun.Ad + "                " +urun.Miktar + "        " + urun.Fiyat + "TL");
+                //        }
+                //        toplam -= Convert.ToDecimal(seciliUrun.Fiyat)*Convert.ToDecimal(seciliUrun.Miktar);
+                //        label1.Text = toplam.ToString() + "TL";
+                //    }
+
+
+
+
+                //if(listBox1.SelectedItems.Count == 0)
+                //{
+
+                //}
+                //else
+                //{
+                //    listBox1.Items.Remove(listBox1.SelectedItem);
+                //}
+
+                //String a = listBox1.SelectedItem.ToString();
+
+
+
+                //string[] words = a.ToString().Split(' ');
+                //foreach (var item in words)
+                //{
+                //    Console.WriteLine(item);
+                //}
+
+
+
+
+
+
+
+
+                //    Console.WriteLine(listBox1.SelectedIndex.GetType()+"*************");
+                ////UrunBilgisi urunBilgi = new UrunBilgisi { Ad = listBox1.SelectedItem., Miktar = 1, Fiyat = urunfiyati };
+                //    UrunBilgisi secili=(UrunBilgisi) listBox1.SelectedItem;
+                //    listBox1.Items.Remove(secili);
+                //    toplam -=Convert.ToInt32( secili.Fiyat) * secili.Miktar;
+                //    label1.Text = toplam.ToString() + "TL";
+
+
+
+
+
+
+
             }
         
-        //if(listBox1.SelectedItems.Count == 0)
-        //{
 
-        //}
-        //else
-        //{
-        //    listBox1.Items.Remove(listBox1.SelectedItem);
-        //}
-
-        //String a = listBox1.SelectedItem.ToString();
-
-
-
-        //string[] words = a.ToString().Split(' ');
-        //foreach (var item in words)
-        //{
-        //    Console.WriteLine(item);
-        //}
-
-
-
-
-
-
-
-
-        //    Console.WriteLine(listBox1.SelectedIndex.GetType()+"*************");
-        ////UrunBilgisi urunBilgi = new UrunBilgisi { Ad = listBox1.SelectedItem., Miktar = 1, Fiyat = urunfiyati };
-        //    UrunBilgisi secili=(UrunBilgisi) listBox1.SelectedItem;
-        //    listBox1.Items.Remove(secili);
-        //    toplam -=Convert.ToInt32( secili.Fiyat) * secili.Miktar;
-        //    label1.Text = toplam.ToString() + "TL";
-
-
-
-
-
-
-
-
-
-    }
-
-        private void button7_Click(object sender, EventArgs e)
+            private void button7_Click(object sender, EventArgs e)
         {
 
                 listBox1.Items.Clear();
