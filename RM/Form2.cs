@@ -1,34 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Data.SqlClient;
-using System.Web.UI.WebControls;
-using System.Collections;
-using System.Data.Common;
-using System.Collections.ObjectModel;
-using Xamarin.Forms;
-using System.Net.NetworkInformation;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
 using Button = System.Windows.Forms.Button;
-using System.Diagnostics.Eventing.Reader;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.Identity.Client;
+using System.Linq;
+using static RM.Form2;
 
 namespace RM
 {
     public partial class Form2 : Form
     {
-        //  SqlConnection conn = new SqlConnection("Data Source=NAZLI\\MSSQLSERVER01;Initial Catalog=RM;Integrated Security=True");
+         SqlConnection conn = new SqlConnection("Data Source=NAZLI;Initial Catalog=kantin;Integrated Security=True");
 
         List<Button> buttons = null;
-
+       
         public Form2()
         {
             InitializeComponent();
@@ -123,22 +108,24 @@ namespace RM
             public string Ad { get; set; }
             public int Miktar { get; set; }
             public string Fiyat { get; set; }
-            public decimal yenitoplam;
+         
+            
         }
         private List<UrunBilgisi> urunBilgileri = new List<UrunBilgisi>();
+        UrunBilgisi urunBilgi;
 
         private decimal toplam;
         public void Butonsayac(object y)
         {
            
 
-            Button buttons = y as Button;
+            
 
-            SqlConnection conn = new SqlConnection("Data Source=NAZLI\\MSSQLSERVER01;Initial Catalog=RM;Integrated Security=True");
+            SqlConnection conn = new SqlConnection("Data Source=NAZLI;Initial Catalog=kantin;Integrated Security=True");
             conn.Open();
-            string qry = ($"SELECT urunadi,urunfiyati FROM operation WHERE urunID={y}");
+            string qry = ($"SELECT urunAdi,urunFiyati FROM urunler WHERE urunID={y}");
             SqlCommand cmd = new SqlCommand(qry, conn);
-            cmd.Parameters.AddWithValue("@ProductId", y);
+            cmd.Parameters.AddWithValue("@urunID", y);
             SqlDataReader reader = cmd.ExecuteReader();
             
 
@@ -147,37 +134,43 @@ namespace RM
             if (reader.Read())
             {
                
-                string urunfiyati = reader["urunfiyati"].ToString();
-                string urunAdi = reader["urunadi"].ToString();
-              
-                UrunBilgisi urunBilgi = new UrunBilgisi { Ad = urunAdi, Miktar = 1, Fiyat = urunfiyati }; 
+                string urunfiyati = reader["urunFiyati"].ToString();
+                string urunAdi = reader["urunAdi"].ToString();
+
+                urunBilgi = new UrunBilgisi { Ad = urunAdi, Miktar = 1, Fiyat = urunfiyati };
+                //UrunBilgisi silinenUrun = new UrunBilgisi { Ad = urunAdi, Miktar = 1, Fiyat = urunfiyati };
+
                 var Urun = urunBilgileri.Find(u => u.Ad == urunAdi);
-                if (Urun != null) //listede ürün adı var mı diye kontrol ediyorum.
+                if (Urun!=null)
                 {
-                     
+                    
                     Urun.Miktar++;
-                  
+                    
+                    
+                    //silinenUrun.Miktar++;
                    
 
 
                 }
+               
                 else
                 {
-                   
-                    urunBilgileri.Add(urunBilgi); 
+                    
+                    urunBilgileri.Add(urunBilgi);
                 }
+                
                 listBox1.Items.Clear();   //fazladan yazmayı kaldırmak için gerekli olan method.
                 foreach (var urun in urunBilgileri)
                 {
                     
                     listBox1.Items.Add(urun.Ad + "                " + urun.Miktar+ "        " +urun.Fiyat+ "TL");
-
+                   
                    
 
                 }
                 //toplama hesabı yapılırken kullandık.
                 toplam += Convert.ToInt32(urunBilgi.Fiyat) * urunBilgi.Miktar;
-                label1.Text = toplam.ToString();
+                label1.Text = toplam.ToString()+"TL";
 
 
 
@@ -288,32 +281,97 @@ namespace RM
         }
 
         private void button6_Click(object sender, EventArgs e)
-        {
-
+        { 
             Form1 frm = new Form1();
             frm.Show();
             this.Hide();
         }
         //listbox'tan verileri seçili veya tamamı şeklinde silme işlemi.
+
+      
+        
         private void button5_Click(object sender, EventArgs e)
         {
-            
-              
-            listBox1.Items.Remove(listBox1.SelectedItem);
-           Console.WriteLine( urunBilgileri.RemoveAll(urunBilgileri.Contains));//ürünleri silip başka ürün eklediğimde önceki silinen ürünler listbox'ta görünüyordu 
-                                                                               //bu yüzden bunu kullandım.
+            if (listBox1.SelectedItem != null)
+            {
+                
+                string seciliUrunAdi = listBox1.SelectedItem.ToString();
+                
+
+                UrunBilgisi seciliUrun = urunBilgileri.FirstOrDefault(u => u.Ad == seciliUrunAdi);
+                
+
+                if (seciliUrun != null)
+                {
+                    
+                    seciliUrun.Miktar--;
+
+                    if (seciliUrun.Miktar <= 0)
+                    {
+                        urunBilgileri.Remove(seciliUrun);
+                    }
+                    Console.WriteLine(seciliUrun.Miktar);
+                    
+                    listBox1.Items.Clear();
+                    foreach (UrunBilgisi urun in urunBilgileri)
+                    {
+                        listBox1.Items.Add(urun.Ad + "                " +urun.Miktar + "        " + urun.Fiyat + "TL");
+                    }
+                    toplam -= Convert.ToDecimal(seciliUrun.Fiyat)*Convert.ToDecimal(seciliUrun.Miktar);
+                    label1.Text = toplam.ToString() + "TL";
+                }
+            }
+        
+        //if(listBox1.SelectedItems.Count == 0)
+        //{
+
+        //}
+        //else
+        //{
+        //    listBox1.Items.Remove(listBox1.SelectedItem);
+        //}
+
+        //String a = listBox1.SelectedItem.ToString();
 
 
-           
+
+        //string[] words = a.ToString().Split(' ');
+        //foreach (var item in words)
+        //{
+        //    Console.WriteLine(item);
+        //}
 
 
-        }
-       
+
+
+
+
+
+
+        //    Console.WriteLine(listBox1.SelectedIndex.GetType()+"*************");
+        ////UrunBilgisi urunBilgi = new UrunBilgisi { Ad = listBox1.SelectedItem., Miktar = 1, Fiyat = urunfiyati };
+        //    UrunBilgisi secili=(UrunBilgisi) listBox1.SelectedItem;
+        //    listBox1.Items.Remove(secili);
+        //    toplam -=Convert.ToInt32( secili.Fiyat) * secili.Miktar;
+        //    label1.Text = toplam.ToString() + "TL";
+
+
+
+
+
+
+
+
+
+    }
+
         private void button7_Click(object sender, EventArgs e)
         {
 
                 listBox1.Items.Clear();
             Console.WriteLine(urunBilgileri.RemoveAll(urunBilgileri.Contains));
+            toplam = 0;
+            label1.Text = toplam.ToString() + "TL";
 
 
 
@@ -321,19 +379,19 @@ namespace RM
         //burda parametreyle button'ları fonksiyonla alıyoruz.
         private void parametre(Button button)
         {
-            SqlConnection conn = new SqlConnection("Data Source=NAZLI\\MSSQLSERVER01;Initial Catalog=RM;Integrated Security=True");
+            SqlConnection conn = new SqlConnection("Data Source=NAZLI;Initial Catalog=kantin;Integrated Security=True");
             conn.Open();
 
 
             string a3 = button.Tag.ToString();
-            string qry = ($"SELECT uruntipi FROM operation WHERE urunID={a3}");
+            string qry = ($"SELECT urunTipi FROM urunler WHERE urunID={a3}");
             SqlCommand cmd = new SqlCommand(qry, conn);
             SqlDataReader reader = cmd.ExecuteReader();
             Console.WriteLine(a3);
             reader.Read();
 
-            Console.WriteLine(reader["uruntipi"]);
-            int a4 = "Yiyecek" == reader["uruntipi"].ToString() ? 0 : 1;
+            Console.WriteLine(reader["urunTipi"]);
+            int a4 = "Yiyecek" == reader["urunTipi"].ToString() ? 0 : 1;
 
             if (comboBox1.SelectedIndex == a4)
             {
@@ -344,6 +402,7 @@ namespace RM
             else
             {
 
+                button.Visible = false;
                 button.Visible = false;
                 
             }
@@ -420,6 +479,13 @@ namespace RM
         {
             
         }
+
+        private void textBox1_TextChanged_2(object sender, EventArgs e)
+        {
+
+        }
+
+        
     }
 }
  
