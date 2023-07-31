@@ -303,7 +303,7 @@ namespace RM
 
                 if (seciliUrun != null)
                 {
-                    
+                    ürün 
                     seciliUrun.Miktar--;
 
                     if (seciliUrun.Miktar <= 0)
